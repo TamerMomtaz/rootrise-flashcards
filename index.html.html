@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RootRise Architecture Flashcards</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+            color: white;
+            overflow-x: hidden;
+        }
+        .progress-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+        .progress-dot {
+            flex: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .progress-dot.active {
+            background: var(--card-color);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .counter {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+        }
+        .layer-tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .card-title {
+            font-size: 22px;
+            margin: 0;
+            line-height: 1.2;
+        }
+        .one-sentence {
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+        }
+        .one-sentence p {
+            font-size: 15px;
+            margin: 0;
+            line-height: 1.5;
+            color: rgba(255,255,255,0.9);
+        }
+        .section-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 8px;
+        }
+        .key-points {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .key-point {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .key-point.expanded {
+            border-color: var(--card-color);
+        }
+        .key-point-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .key-point-label {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .key-point-toggle {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+        .key-point-detail {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            margin: 8px 0 0 0;
+            line-height: 1.4;
+            display: none;
+        }
+        .key-point.expanded .key-point-detail {
+            display: block;
+        }
+        .differentiator {
+            padding: 10px 14px;
+            border-left: 3px solid var(--card-color);
+            border-radius: 0 8px 8px 0;
+        }
+        .differentiator p {
+            font-size: 12px;
+            margin: 0;
+            color: rgba(255,255,255,0.8);
+        }
+        .pitch-box {
+            background: rgba(19, 41, 56, 0.6);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+        .pitch-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pitch-text {
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+            color: rgba(255,255,255,0.85);
+            font-style: italic;
+        }
+        .navigation {
+            display: flex;
+            gap: 12px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.1s;
+        }
+        .nav-btn:active {
+            transform: scale(0.98);
+        }
+        .nav-btn.prev {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+        }
+        .nav-btn.next {
+            color: #1a1a2e;
+        }
+        .quick-jump {
+            margin-top: 16px;
+            text-align: center;
+        }
+        .quick-jump-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            margin: 0 0 8px 0;
+        }
+        .quick-jump-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+        .quick-jump-btn {
+            padding: 6px 12px;
+            font-size: 11px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+        }
+        /* Touch swipe support */
+        .swipe-hint {
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // All 20 flashcards data
+        const cards = [
+            {
+                id: 1,
+                icon: '📱',
+                title: 'Application Interface',
+                layer: 'Layer 4 — User Experience',
+                color: '#E1A549',
+                oneSentence: 'Where users interact with RootRise — role-based dashboards that show each user exactly what they need.',
+                pitch: '"The Application Interface is how users actually touch RootRise. It\'s role-based — an SME owner sees their growth dashboard, a program manager sees portfolio analytics for 500 SMEs. Same intelligence engine, different lens."',
+                keyPoints: [
+                    { label: 'SME Owner', detail: 'Growth dashboard, action items, progress tracking' },
+                    { label: 'Associate', detail: 'Task management, SME status, expert escalation' },
+                    { label: 'Program Manager', detail: 'Portfolio analytics, cohort progress, impact metrics' }
+                ],
+                differentiator: 'Built for SME transformation workflows — not retrofitted from enterprise software.'
+            },
+            {
+                id: 2,
+                icon: '🎭',
+                title: 'Multi-Agent Orchestration',
+                layer: 'Layer 3 — The Brain',
+                color: '#5BA3B8',
+                oneSentence: 'Multiple specialized AI agents working in concert, each optimized for one task, coordinated by an orchestration layer.',
+                pitch: '"Instead of one AI trying to do everything — which is what a chatbot does — we have specialized agents that each do one thing extremely well. The orchestration layer coordinates them and decides when to hand off to humans. Think surgical team, not general practitioner."',
+                keyPoints: [
+                    { label: 'State Management', detail: 'Maintains context across months of engagement' },
+                    { label: 'Context Passing', detail: 'Each agent knows what the others have done' },
+                    { label: 'Human Handoffs', detail: 'Knows when to escalate to experts' }
+                ],
+                differentiator: 'Not one model stretched thin — purpose-built specialists working together.'
+            },
+            {
+                id: 3,
+                icon: '🧠',
+                title: 'Contextual Intelligence Engine',
+                layer: 'Layer 2 — Regional Expertise',
+                color: '#2A5A6E',
+                oneSentence: 'Sector-specific reasoning trained on MENA market realities, business behaviors, and regulatory constraints.',
+                pitch: '"This is where RootRise becomes MENA-native. The engine understands local market constraints, regulatory environments, cultural business practices. A generic AI doesn\'t know that family succession in Gulf businesses requires different handling than a startup. Ours does."',
+                keyPoints: [
+                    { label: 'Sector Logic', detail: 'Textile vs. tech vs. food — different playbooks' },
+                    { label: 'Market Models', detail: 'Egypt vs. Gulf vs. Levant dynamics' },
+                    { label: 'Maturity Frameworks', detail: 'Startup vs. established SME approaches' }
+                ],
+                differentiator: 'A Western AI misses MENA nuances. Ours is built on them.'
+            },
+            {
+                id: 4,
+                icon: '🗄️',
+                title: 'Unified Data Warehouse',
+                layer: 'Layer 1 — Foundation',
+                color: '#132938',
+                oneSentence: 'Every SME profile, diagnostic, outcome, and metric in one place — the memory that makes the system smarter with each engagement.',
+                pitch: '"Every SME profile, every diagnostic result, every implementation outcome — it all lives in one repository. This isn\'t just storage; it\'s memory. When we\'ve helped 500 SMEs, the warehouse knows what worked for which profiles. The more SMEs we serve, the smarter every recommendation becomes."',
+                keyPoints: [
+                    { label: 'Pattern Recognition', detail: 'What interventions work for which SME types' },
+                    { label: 'Dynamic Profiles', detail: 'SME data updates continuously, not static snapshots' },
+                    { label: 'Benchmarking', detail: 'Compare any SME to sector/region peers' }
+                ],
+                differentiator: 'Not siloed data — unified intelligence that compounds over time.'
+            },
+            {
+                id: 5,
+                icon: '🤝',
+                title: 'Human-in-the-Loop',
+                layer: 'The "&I" in AI &I',
+                color: '#E1A549',
+                oneSentence: 'AI generates, humans validate. Every critical output passes through qualified experts before reaching the SME.',
+                pitch: '"This is the \'&I\' — the human intelligence that validates everything. Embedded associates on the ground, senior domain experts reviewing outputs. No recommendation goes to an SME owner without a human confirming it makes sense. This is why we\'re reliable where chatbots are risky."',
+                keyPoints: [
+                    { label: 'Embedded Associates', detail: 'On-site at SMEs, real-time ground truth' },
+                    { label: 'Senior Experts', detail: 'Validate AI outputs before delivery' },
+                    { label: 'SME Owner Sign-off', detail: 'Final confirmation before action' }
+                ],
+                differentiator: 'Three validation gates — not unsupervised AI gambling with business decisions.'
+            },
+            {
+                id: 6,
+                icon: '♾️',
+                title: 'Continuous Learning',
+                layer: 'The Feedback Loop',
+                color: '#5BA3B8',
+                oneSentence: 'Every cycle teaches the system — diagnostics, expert corrections, outcomes all feed back to strengthen accuracy.',
+                pitch: '"Every cycle teaches the system. Diagnostic completed? That data improves future diagnostics. Expert corrected a recommendation? The system learns. Implementation succeeded or failed? Those outcomes feed back. We compound in accuracy with every SME. By SME 1,000, we\'re dramatically smarter than at SME 100."',
+                keyPoints: [
+                    { label: 'Data → Intelligence', detail: 'Every engagement adds to the knowledge base' },
+                    { label: 'Expert Corrections', detail: 'Human refinements train the AI' },
+                    { label: 'Outcome Tracking', detail: 'What worked becomes what we recommend' }
+                ],
+                differentiator: 'Not static software — a living system that evolves with every use.'
+            },
+            {
+                id: 7,
+                icon: '🚀',
+                title: 'Beyond the Chatbot',
+                layer: 'The Key Distinction',
+                color: '#E1A549',
+                oneSentence: 'A chatbot gives information. RootRise drives transformation through coordinated, specialized, validated intelligence.',
+                pitch: '"A chatbot is one model trying to do everything with one prompt. You ask about your business, it gives generic advice, and you figure out the rest. That\'s not transformation — that\'s information. RootRise has purpose-built agents that specialize, coordinate, and drive actual change."',
+                keyPoints: [
+                    { label: 'Chatbot', detail: 'Prompt → Response (and you\'re on your own)' },
+                    { label: 'RootRise', detail: 'Data → Intelligence → Action → Validation → Learning' },
+                    { label: 'Result', detail: 'Sustained transformation, not one-off advice' }
+                ],
+                differentiator: 'The difference between asking for directions and having a driver.'
+            },
+            {
+                id: 8,
+                icon: '🔍',
+                title: 'Diagnostics Agent',
+                layer: 'Specialized Agent #1',
+                color: '#2A5A6E',
+                oneSentence: 'Runs comprehensive multi-dimensional assessment across 8+ business areas, producing structured diagnostic profiles.',
+                pitch: '"This agent runs our comprehensive assessment — eight-plus dimensions of business health. It\'s not just asking questions; it\'s scoring, benchmarking, identifying gaps, mapping maturity. The output is a structured diagnostic profile that becomes the foundation for everything that follows."',
+                keyPoints: [
+                    { label: 'Dimensions', detail: 'Leadership, Operations, Marketing, Finance, HR, Digital, Export, Investment Readiness' },
+                    { label: 'Output', detail: 'Structured diagnostic profile with gap analysis' },
+                    { label: 'Speed', detail: 'What takes consultants weeks, done in hours' }
+                ],
+                differentiator: 'Sector-aware scoring that benchmarks against real MENA peers.'
+            },
+            {
+                id: 9,
+                icon: '📋',
+                title: 'Growth Planning Agent',
+                layer: 'Specialized Agent #2',
+                color: '#E1A549',
+                oneSentence: 'Generates prioritized roadmaps with resource allocation, timeline sequencing, and quick-win identification.',
+                pitch: '"Once we know where the SME stands, this agent generates the roadmap. Prioritized recommendations, resource allocation, timeline sequencing, quick wins identified. It pulls from our knowledge base of what\'s worked for similar SMEs. Experts then refine — but the synthesis is done."',
+                keyPoints: [
+                    { label: 'Prioritization', detail: 'What to do first, second, third' },
+                    { label: 'Resource Mapping', detail: 'Who does what, with what budget' },
+                    { label: 'Quick Wins', detail: 'Early victories to build momentum' }
+                ],
+                differentiator: 'Not generic advice — roadmaps based on what worked for similar SMEs.'
+            },
+            {
+                id: 10,
+                icon: '⚙️',
+                title: 'Implementation Agent',
+                layer: 'Specialized Agent #3',
+                color: '#5BA3B8',
+                oneSentence: 'Breaks plans into tasks, tracks progress, identifies blockers, and guides execution with templates and tools.',
+                pitch: '"Plans are worthless without execution. This agent breaks recommendations into tasks, creates checklists, provides templates, tracks progress, identifies blockers. It\'s the project manager working alongside our transformation associates. If something\'s off track, it flags it before it becomes a crisis."',
+                keyPoints: [
+                    { label: 'Task Breakdown', detail: 'Strategy → concrete actions with owners' },
+                    { label: 'Progress Tracking', detail: 'Real-time visibility on execution' },
+                    { label: 'Blocker Alerts', detail: 'Early warning when things stall' }
+                ],
+                differentiator: 'Why RootRise drives change, not just delivers reports.'
+            },
+            {
+                id: 11,
+                icon: '📊',
+                title: 'Monitoring Agent',
+                layer: 'Specialized Agent #4',
+                color: '#132938',
+                oneSentence: 'Real-time KPI tracking, anomaly detection, performance benchmarking, and proactive alerts.',
+                pitch: '"Once changes are implemented, this agent watches the KPIs. Real-time tracking, anomaly detection, benchmarking. If an SME\'s metrics trend the wrong way, we know immediately — not three months later. This is what enables the \'Sustain\' phase to actually sustain."',
+                keyPoints: [
+                    { label: 'Live Dashboards', detail: 'KPIs updated continuously' },
+                    { label: 'Anomaly Detection', detail: 'Spots problems before they escalate' },
+                    { label: 'Dynamic Profiling', detail: 'SME profile evolves with performance' }
+                ],
+                differentiator: 'Not quarterly check-ins — continuous intelligence.'
+            },
+            {
+                id: 12,
+                icon: '🔄',
+                title: 'Feedback & Customization Agent',
+                layer: 'Specialized Agent #5',
+                color: '#E1A549',
+                oneSentence: 'Incorporates stakeholder feedback to refine outputs — iterative until plans fit the SME\'s specific needs.',
+                pitch: '"Every output can be refined based on feedback. If a growth plan needs adjustment — different priorities, budget constraints, timeline changes — this agent incorporates that and regenerates. It\'s not one-shot; it\'s iterative until the SME owner and our experts agree it\'s right."',
+                keyPoints: [
+                    { label: 'Iterative Refinement', detail: 'Plans improve with each feedback loop' },
+                    { label: 'Constraint Handling', detail: 'Adjusts for budget, time, resource limits' },
+                    { label: 'Stakeholder Alignment', detail: 'Ensures buy-in before execution' }
+                ],
+                differentiator: 'Not take-it-or-leave-it — collaborative plan development.'
+            },
+            {
+                id: 13,
+                icon: '🌍',
+                title: 'Context Agent',
+                layer: 'Specialized Agent #6',
+                color: '#2A5A6E',
+                oneSentence: 'Ensures recommendations are culturally appropriate, ethically sound, and respect local constraints.',
+                pitch: '"Business in the Gulf operates differently than in the Levant. Family dynamics, religious considerations, regulatory constraints, gender dynamics — these aren\'t footnotes, they\'re central. This agent ensures recommendations are culturally appropriate and ethically sound. A Western AI wouldn\'t know these. Ours is built on them."',
+                keyPoints: [
+                    { label: 'Cultural Fit', detail: 'Family business dynamics, local customs' },
+                    { label: 'Regulatory Awareness', detail: 'Country-specific compliance' },
+                    { label: 'Ethical Guardrails', detail: 'Recommendations that respect values' }
+                ],
+                differentiator: 'MENA-native intelligence, not Western assumptions translated.'
+            },
+            {
+                id: 14,
+                icon: '⚖️',
+                title: 'What RootRise Is & Isn\'t',
+                layer: 'The Positioning',
+                color: '#E1A549',
+                oneSentence: 'Preempting investor skepticism by clearly distinguishing RootRise from thin AI wrappers and generic tools.',
+                pitch: '"Investors are right to be skeptical. The market is flooded with AI claims that are thin wrappers around APIs. This is where we preempt that directly — here\'s what we\'re NOT, and here\'s what we ARE. Clear contrast builds credibility."',
+                keyPoints: [
+                    { label: 'Why This Matters', detail: 'Investors have seen too many "AI" claims' },
+                    { label: 'The Setup', detail: 'Name their concerns before they do' },
+                    { label: 'The Payoff', detail: 'Show architectural depth they didn\'t expect' }
+                ],
+                differentiator: 'Transparency about what we\'re not builds trust in what we are.'
+            },
+            {
+                id: 15,
+                icon: '🚫',
+                title: 'NOT a ChatGPT Wrapper',
+                layer: 'What We\'re Not #1',
+                color: '#8B4444',
+                oneSentence: 'We don\'t just pass prompts to OpenAI and return results — that gives generic outputs with no context or accountability.',
+                pitch: '"We\'re not taking a prompt, sending it to OpenAI, and returning the result. That gives you generic outputs with no SME context, no validation, no accountability. One hallucination and you\'ve given bad advice to a business owner. That\'s not us."',
+                keyPoints: [
+                    { label: 'Wrapper Problem', detail: 'Generic in, generic out' },
+                    { label: 'No Context', detail: 'Doesn\'t know the SME or market' },
+                    { label: 'No Accountability', detail: 'If it hallucinates, who\'s responsible?' }
+                ],
+                differentiator: 'Our AI is purpose-built, not prompt-forwarded.'
+            },
+            {
+                id: 16,
+                icon: '🔌',
+                title: 'NOT a Simple API Integration',
+                layer: 'What We\'re Not #2',
+                color: '#8B4444',
+                oneSentence: 'Single-call responses with no state, memory, or multi-step reasoning — that\'s retrieval, not intelligence.',
+                pitch: '"Single-call responses without state, memory, or multi-step reasoning. That\'s not intelligence — that\'s retrieval. RootRise maintains context across months of engagement. We know what we told you last month and whether you did it."',
+                keyPoints: [
+                    { label: 'API Problem', detail: 'No memory between calls' },
+                    { label: 'No State', detail: 'Each interaction starts from zero' },
+                    { label: 'No Reasoning', detail: 'Can\'t handle multi-step problems' }
+                ],
+                differentiator: 'We maintain context across the entire transformation journey.'
+            },
+            {
+                id: 17,
+                icon: '📦',
+                title: 'NOT Off-the-Shelf SaaS',
+                layer: 'What We\'re Not #3',
+                color: '#8B4444',
+                oneSentence: 'Western-designed, one-size-fits-all tools that don\'t understand MENA markets fail in this region.',
+                pitch: '"Western-designed, one-size-fits-all solutions that don\'t understand MENA market realities. We\'ve seen these fail in the region because they assume contexts that don\'t exist here. Different regulatory environments, different business cultures, different growth patterns."',
+                keyPoints: [
+                    { label: 'SaaS Problem', detail: 'Built for Silicon Valley, deployed everywhere' },
+                    { label: 'Cultural Blindness', detail: 'Misses family business dynamics' },
+                    { label: 'Regulatory Ignorance', detail: 'Doesn\'t know local compliance' }
+                ],
+                differentiator: 'Built in MENA, for MENA, by MENA practitioners.'
+            },
+            {
+                id: 18,
+                icon: '🤖',
+                title: 'NOT AI-Only Automation',
+                layer: 'What We\'re Not #4',
+                color: '#8B4444',
+                oneSentence: 'Unsupervised AI outputs are risky for high-stakes business decisions — no nuance, no cultural awareness, no catch for errors.',
+                pitch: '"Unsupervised AI outputs are risky for high-stakes business decisions. No human in the loop means no nuance, no cultural awareness, no catch for when the AI gets it wrong. We don\'t trust AI alone with an SME owner\'s livelihood. Neither should anyone."',
+                keyPoints: [
+                    { label: 'AI-Only Problem', detail: 'No one checking the output' },
+                    { label: 'High Stakes', detail: 'Business decisions aren\'t trivial' },
+                    { label: 'Error Risk', detail: 'One bad recommendation damages trust' }
+                ],
+                differentiator: 'Every critical output passes through human validation gates.'
+            },
+            {
+                id: 19,
+                icon: '🏗️',
+                title: 'IS: Purpose-Built Infrastructure',
+                layer: 'What We Are #1',
+                color: '#2A8B5A',
+                oneSentence: 'Not a tool — an infrastructure. Orchestrated AI agents, unified data warehouse, workflow automation, enterprise-grade security.',
+                pitch: '"RootRise isn\'t a tool — it\'s infrastructure. Orchestrated AI agents, unified data warehouse, workflow automation, enterprise-grade security. This is what powers transformation at scale. You can\'t scale SME development with duct-taped tools. You need architecture."',
+                keyPoints: [
+                    { label: 'Orchestration', detail: 'Agents that coordinate, not compete' },
+                    { label: 'Data Foundation', detail: 'Unified warehouse, not scattered files' },
+                    { label: 'Enterprise-Ready', detail: 'Security, multi-tenancy, scale' }
+                ],
+                differentiator: 'Built to run programs of 1,000+ SMEs, not just one-off demos.'
+            },
+            {
+                id: 20,
+                icon: '🌟',
+                title: 'IS: MENA-Native Hybrid Intelligence',
+                layer: 'What We Are #2, #3, #4',
+                color: '#2A8B5A',
+                oneSentence: 'Multi-agent orchestration + MENA-native intelligence + Human-in-the-loop by design = the complete &I philosophy.',
+                pitch: '"Three things define us: Multi-agent orchestration — specialized agents with state management and human handoffs. MENA-native intelligence — trained on regional SME realities, not Western assumptions. Human-in-the-loop by design — every critical output validated. That\'s the complete \'&I\' philosophy. AI amplifying humans, not replacing them."',
+                keyPoints: [
+                    { label: 'Multi-Agent', detail: 'Specialists coordinated, not generalist stretched' },
+                    { label: 'MENA-Native', detail: 'Built by practitioners who\'ve worked here 30 years' },
+                    { label: '&I Philosophy', detail: 'AI + Human Intelligence, together' }
+                ],
+                differentiator: 'The only solution combining all three in this market.'
+            }
+        ];
+
+        let currentCard = 0;
+        let expandedItem = null;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function render() {
+            const card = cards[currentCard];
+            document.documentElement.style.setProperty('--card-color', card.color);
+            
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <!-- Progress Bar -->
+                <div class="progress-bar">
+                    ${cards.map((_, idx) => `
+                        <div class="progress-dot ${idx === currentCard ? 'active' : ''}" 
+                             onclick="goToCard(${idx})"
+                             style="${idx === currentCard ? 'background:' + card.color : ''}"></div>
+                    `).join('')}
+                </div>
+
+                <!-- Header -->
+                <div class="header">
+                    <span class="counter">${currentCard + 1} of ${cards.length}</span>
+                    <span class="layer-tag" style="color:${card.color}; background:${card.color}22">
+                        ${card.layer}
+                    </span>
+                </div>
+
+                <!-- Main Card -->
+                <div class="card" style="border-color:${card.color}44">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:linear-gradient(135deg, ${card.color} 0%, ${card.color}88 100%)">
+                            ${card.icon}
+                        </div>
+                        <h1 class="card-title" style="color:${card.color}">${card.title}</h1>
+                    </div>
+
+                    <div class="one-sentence" style="background:${card.color}15; border:1px solid ${card.color}33">
+                        <p><span style="color:${card.color}; font-weight:600">In one sentence: </span>${card.oneSentence}</p>
+                    </div>
+
+                    <p class="section-label">Key Points (tap to expand)</p>
+                    <div class="key-points">
+                        ${card.keyPoints.map((point, idx) => `
+                            <div class="key-point ${expandedItem === idx ? 'expanded' : ''}" 
+                                 onclick="togglePoint(${idx})"
+                                 style="${expandedItem === idx ? 'background:' + card.color + '22; border-color:' + card.color : ''}">
+                                <div class="key-point-header">
+                                    <span class="key-point-label" style="color:${card.color}">${point.label}</span>
+                                    <span class="key-point-toggle">${expandedItem === idx ? '−' : '+'}</span>
+                                </div>
+                                <p class="key-point-detail">${point.detail}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="differentiator" style="background:${card.color}10; border-left-color:${card.color}">
+                        <p><strong style="color:${card.color}">Why it matters: </strong>${card.differentiator}</p>
+                    </div>
+                </div>
+
+                <!-- Pitch Box -->
+                <div class="pitch-box">
+                    <p class="pitch-label" style="color:${card.color}">🎤 Your 15-Second Pitch</p>
+                    <p class="pitch-text">${card.pitch}</p>
+                </div>
+
+                <!-- Navigation -->
+                <div class="navigation">
+                    <button class="nav-btn prev" onclick="goPrev()">← Previous</button>
+                    <button class="nav-btn next" onclick="goNext()" 
+                            style="background:linear-gradient(135deg, ${card.color} 0%, ${card.color}cc 100%)">
+                        Next →
+                    </button>
+                </div>
+
+                <!-- Quick Jump -->
+                <div class="quick-jump">
+                    <p class="quick-jump-label">Quick Jump</p>
+                    <div class="quick-jump-buttons">
+                        <button class="quick-jump-btn" onclick="goToCard(0)">Architecture</button>
+                        <button class="quick-jump-btn" onclick="goToCard(7)">Agents</button>
+                        <button class="quick-jump-btn" onclick="goToCard(14)">Not/Is</button>
+                    </div>
+                </div>
+
+                <p class="swipe-hint">← Swipe to navigate →</p>
+            `;
+        }
+
+        function goNext() {
+            currentCard = (currentCard + 1) % cards.length;
+            expandedItem = null;
+            render();
+            window.scrollTo(0, 0);
+        }
+
+        function goPrev() {
+            currentCard = (currentCard - 1 + cards.length) % cards.length;
+            expandedItem = null;
+            render();
+            window.scrollTo(0, 0);
+        }
+
+        function goToCard(idx) {
+            currentCard = idx;
+            expandedItem = null;
+            render();
+            window.scrollTo(0, 0);
+        }
+
+        function togglePoint(idx) {
+            expandedItem = expandedItem === idx ? null : idx;
+            render();
+        }
+
+        // Touch swipe support
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    goNext(); // Swipe left = next
+                } else {
+                    goPrev(); // Swipe right = previous
+                }
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight') goNext();
+            if (e.key === 'ArrowLeft') goPrev();
+        });
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
